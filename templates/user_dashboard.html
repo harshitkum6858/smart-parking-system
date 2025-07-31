@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Available Parking Lots</h2>
+<div class="row">
+    {% for lot in lots %}
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ lot.name }}</h5>
+                <p class="card-text">{{ lot.address }}</p>
+                <p class="card-text"><span class="badge bg-success">{{ lot.available_spots }}</span> spots available</p>
+                <a href="{{ url_for('book_spot', lot_id=lot.id) }}" class="btn btn-primary">Book a Spot</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <p class="text-center">No parking lots have been created by the admin yet.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

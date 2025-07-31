@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Registered Users</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Active Bookings</th>
+            <th>Total Bookings</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.reservations|selectattr('leaving_time', 'equalto', None)|list|length }}</td>
+            <td>{{ user.reservations|length }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" class="text-center">No users found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

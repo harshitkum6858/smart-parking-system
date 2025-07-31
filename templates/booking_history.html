@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>My Booking History</h2>
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary"><i class="bi bi-p-circle-fill"></i> Book New Spot</a>
+</div>
+
+{% if reservations %}
+<div class="row">
+    <div class="col-lg-8">
+        <h4>All Reservations</h4>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Lot</th>
+                        <th>Spot #</th>
+                        <th>Parked On</th>
+                        <th>Released On</th>
+                        <th>Cost</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reservations %}
+                    <tr>
+                        <td>{{ r.spot.lot.name }}</td>
+                        <td>{{ r.spot.spot_number }}</td>
+                        <td>{{ r.parking_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+                        <td>{% if r.leaving_time %}{{ r.leaving_time.strftime('%d %b %Y, %I:%M %p') }}{% else %}<span class="badge bg-success">Parked</span>{% endif %}</td>
+                        <td>{% if r.cost %}${{ "%.2f"|format(r.cost) }}{% else %}N/A{% endif %}</td>
+                        <td>
+                            {% if not r.leaving_time %}
+                            <a href="{{ url_for('release_spot', reservation_id=r.id) }}" class="btn btn-sm btn-danger">Release Spot</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Parking Summary</div>
+            <div class="card-body">
+                <canvas id="parkingSummaryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center">
+    <p>You have no booking history yet.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if reservations %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    fetch('/user/chart-data')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('parkingSummaryChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Parking Events',
+                        data: data.data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(153, 102, 255, 0.5)',
+                            'rgba(255, 159, 64, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Parking Events by Lot'
+                        }
+                    }
+                }
+            });
+        });
+</script>
+{% endif %}
+{% endblock %}
